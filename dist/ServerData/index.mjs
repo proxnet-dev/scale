@@ -1,10 +1,9 @@
 import events from "node:events";
 import * as fs from "node:fs"
 
-import { falsePaths } from "./fatal.mjs";
-
 import Logging from "./log.mjs";
-let moduleName = 'Main'
+
+let moduleName = 'Main';
 let log = new Logging(moduleName, true);
 
 let event = new events.EventEmitter();
@@ -26,13 +25,12 @@ try {
 } catch (err) { // JSON is not valid, file could not be read, etc
     log.error(`Cannot start up: The specified configuration at ${configPath} could not be read.\n ${err.stack}`);
     process.exit(1);
-}
+} // there *shouldn't* be anything in the event loop.
 
-if (!falsePaths.length == 0) {
-    log.error(`Cannot start up: Required directories do not exist. Expected directories: ${JSON.stringify(falsePaths)}`);
-    process.exit(1);
-}
-// there *shouldn't* be anything in the event loop.
+// Create default module directories
+config.requiredDirectories.forEach((val, i) => {
+    if (!fs.existsSync(config.requiredDirectories[i])) fs.mkdirSync(config.requiredDirectories[i]);
+});
 
 if (config.clearConsoleOnStartup === true) {
     console.clear();
@@ -54,10 +52,11 @@ try {
 }
 
 log.info(`Starting ${packageName} v${versionString}`);
-log.info(`CWD: ${process.cwd()}`);
+if (config.verboseImport) log.info(`CWD: ${process.cwd()}`);
 
 // Import modules and execute the thangs
 let path = './modules/';
+let modules = [];
 fs.readdir(path, (err, files) => {
 
     if (err) {
@@ -73,7 +72,7 @@ fs.readdir(path, (err, files) => {
     files.forEach((value, i, array) => {
         if (value.endsWith('.mjs')) validFiles.push(value); // If it's a valid module, push it to the array
     });
-    log.info(`Importing files ${JSON.stringify(validFiles)} from '${path}'`);
+    if (config.verboseImport) log.info(`Importing files ${JSON.stringify(validFiles)} from '${path}'`);
 
     validFiles.forEach(async (value, i, array) => {
 
@@ -81,25 +80,32 @@ fs.readdir(path, (err, files) => {
 
         // Invalid module checks
         if (typeof modTempObject.default == 'undefined') {
-            log.warn(`Module ${value} does not contain a default export, skipping.`);
+            if (config.verboseImport) log.warn(`Module '${value}' does not contain a default export, skipping.`);
             return;
         }
         if (typeof modTempObject.default.moduleName == 'undefined') {
-            log.warn(`Module ${value} does not export the default property 'moduleName', skipping.`);
+            if (config.verboseImport) log.warn(`Module '${value}' does not export the default property 'moduleName', skipping.`);
             return;
         }
         const tempModuleName = modTempObject.default.moduleName;
+        if (modules.includes(tempModuleName)) {
+            if (config.verboseImport) log.warn(`Module '${tempModuleName}' (${value}) conflicts with another module, skipping.`);
+            return;
+        } else {
+            modules.push(tempModuleName); // Used to prevent importing modules with names that conflict with each other
+        }
 
         if (typeof modTempObject !== 'object') {
-            log.warn(`Default export for module ${tempModuleName} (${value}) has a non-standard type.`);
+            if (config.verboseImport) log.warn(`Default export for module '${tempModuleName}' (${value}) has a non-standard type.`);
         } else {
             if (typeof modTempObject.default.exec == 'undefined') {
-                log.warn(`Module ${tempModuleName} (${value}) does not export the default function 'exec'.`);
+                if (config.verboseImport) log.warn(`Module '${tempModuleName}' (${value}) does not export the default function 'exec'.`);
             } else {
                 try {
                     modTempObject.default.exec(); // Call the module default execution function. Can be either asynchronous or synchronous.
                 } catch (err) {
-                    log.error(`Module ${tempModuleName} (${value}) crashed. Stack:\n${err.stack}`); // This is called only for synchronous execution functions. Async functions will kill the process.
+                    log.error(`Module '${tempModuleName}' (${value}) crashed. Stack:\n${err.stack}`); 
+                    // This is called only for synchronous execution functions. Async exec functions that aren't wrapped in a trycatch will kill the process.
                 }
                 
                 if (i + 1 == array.length) {event.emit('post');} // After all modules have been executed

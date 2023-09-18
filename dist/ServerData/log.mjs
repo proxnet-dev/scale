@@ -1,39 +1,55 @@
 import chalk from "chalk";
+import { config } from "./index.mjs";
 
 class Logging {
 
+    /**
+     * @param {string} mod Module idenfitier. Used in every line to identify the module that sent the message.
+     * @param {boolean} silentInst Set to false to log a message when the logger instantiates. Useful for debugging.
+     * @returns A source for logging messages to the console. Functions for info, warnings, errors, debug statements, and network events are provided and have shorthands.
+     */
     constructor(mod, silentInst) {
         if (!mod) {
-            this.moduleNameRaw = 'Unknown';
-            this.moduleNamePadded = '';
-            this.warn(`Logging instantiated without a module identifier`);
+            this.moduleName = generateRandomString(12);
+            this.warn(`Logging instantiated without a module identifier, using random string`);
+        } else if (typeof mod !== 'string') {
+            this.moduleName = generateRandomString(12);
+            this.warn(`Logging instantiated with a non-string module identifier, using random string`);
         } else {
-            this.moduleNameRaw = mod;
-            this.moduleNamePadded = mod + ' ';
-            if (silentInst) this.info(`Instantiated module logging for ${this.moduleNameRaw}`);
+            this.moduleName = mod;
+            if (silentInst == false) this.info(`Instantiated module logging for ${mod}`);
         }
+
+        // logging type shorthand
+        this.i = this.info;
+        this.w = this.warn;
+        this.e = this.error;
+        this.d = this.debug;
+        this.n = this.network;
+        this.err = this.error;
+        this.net = this.network;
     }
 
     async info(msg) {
-        let msgFormat = chalk.gray(getFormattedDate()) + chalk.bgWhite.black(`${this.moduleNamePadded}[INFO]`) + chalk.whiteBright(' ' + msg);
+        let msgFormat = chalk.gray(getFormattedDate()) + chalk.bgWhite.black(`${this.moduleName} [INFO]`) + chalk.whiteBright(' ' + msg);
         console.log(msgFormat);
     }
 
     async warn(msg) {
-        console.warn(chalk.gray(getFormattedDate()) + chalk.bgYellow.black(`${this.moduleNamePadded}[WARN]`) + chalk.yellowBright(' ' + msg));
+        console.warn(chalk.gray(getFormattedDate()) + chalk.bgYellow.black(`${this.moduleName} [WARN]`) + chalk.yellowBright(' ' + msg));
     }
     
     async error(msg) {
-        console.error(chalk.gray(getFormattedDate()) + chalk.bgRed.black(`${this.moduleNamePadded}[ERROR]`) + chalk.redBright(' ' + msg));
+        console.error(chalk.gray(getFormattedDate()) + chalk.bgRed.black(`${this.moduleName} [ERROR]`) + chalk.redBright(' ' + msg));
     }
 
     async debug(msg) {
-        if (arguments.length !== 1) console.error(chalk.gray(getFormattedDate()) + chalk.bgGreen.black(`${this.moduleNamePadded}[DEBUG]`) + chalk.greenBright(' ' + coerce(arguments)));
-        else console.error(chalk.gray(getFormattedDate()) + chalk.bgGreen.black(`${this.moduleNamePadded}[DEBUG]`) + chalk.greenBright(' ' + msg));
+        if (arguments.length !== 1) console.error(chalk.gray(getFormattedDate()) + chalk.bgGreen.black(`${this.moduleName} [DEBUG]`) + chalk.greenBright(' ' + coerce(arguments)));
+        else console.error(chalk.gray(getFormattedDate()) + chalk.bgGreen.black(`${this.moduleName} [DEBUG]`) + chalk.greenBright(' ' + msg));
     }
 
     async network(msg) {
-        console.error(chalk.gray(getFormattedDate()) + chalk.bgCyan.black(`${this.moduleNamePadded}[NETWORK]`) + chalk.cyanBright(' ' + msg));
+        console.error(chalk.gray(getFormattedDate()) + chalk.bgCyan.black(`${this.moduleName} [NETWORK]`) + chalk.cyanBright(' ' + msg));
     }
 
 }
@@ -49,7 +65,7 @@ function getFormattedDate() {
         minute: '2-digit',
         second: '2-digit',
         hour12: true,
-        timeZone: 'America/New_York',
+        timeZone: config.timezone,
         timeZoneName: 'short'
     };
 
@@ -57,13 +73,26 @@ function getFormattedDate() {
 }
 
 function coerce(inArgs) {
-    let constructedMsg = new String;
+    let constructedMsg = "";
     let args = Array.from(inArgs);
-    args.forEach((value, i, array) => {
-        if (typeof value == 'function' || typeof value == 'object') return;
-        else constructedMsg = constructedMsg + `${value} `;
+    args.forEach((val) => {
+        if (typeof val == 'function' || typeof val == 'object') return;
+        else constructedMsg = constructedMsg + `${val} `;
     });
     return constructedMsg;
 }
 
+function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let randomString = '';
+  
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        randomString += characters.charAt(randomIndex);
+    }
+  
+    return randomString;
+}
+
+export { generateRandomString };
 export default Logging;

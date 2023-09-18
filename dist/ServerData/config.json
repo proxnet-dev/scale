@@ -1,4 +1,6 @@
 {
     "timezone": "America/New_York",
-    "clearConsoleOnStartup": true
+    "clearConsoleOnStartup": true,
+    "verboseImport": false,
+    "requiredDirectories": ["./moduleconfigs", "./modules"]
 }
