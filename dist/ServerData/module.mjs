@@ -26,22 +26,10 @@ class Module {
     }
 }
 
-function generateRandomString(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let randomString = '';
-  
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        randomString += characters.charAt(randomIndex);
-    }
-  
-    return randomString;
-}
-
-function getModuleConfig(modname) {
-    if (typeof modname !== 'string') return null;
+function getModuleConfig(modName) {
+    if (typeof modName !== 'string') return null;
     let data = {};
-    let dataPath = `./moduleconfigs/${modname.toLowerCase()}.json`;
+    let dataPath = `./moduleconfigs/${modName.toLowerCase()}.json`;
     try {
         if (fs.existsSync(dataPath)) data = JSON.parse(fs.readFileSync(dataPath));
         return data;
@@ -51,5 +39,4 @@ function getModuleConfig(modname) {
     }
 }
 
-export { generateRandomString };
 export default Module;
