@@ -1,9 +1,0 @@
-{
-    "foo": "bar",
-    "number": 39,
-    "network": {
-        "port": 3000,
-        "address": "localhost"
-    },
-    "array": [39, 39, 39]
-}
