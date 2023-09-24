@@ -2,7 +2,7 @@
 Scalable module management and data import system
 
 ## Getting Started
-Extract the code to a directory with sufficient read and write permissions.<br>
+Extract the code to a directory with sufficient read permissions.<br>
 Ensure you have [Node.js and npm](https://nodejs.org/en) installed.<br>
 Run `npm i` to install the (one) dependency (chalk).<br>
 Run `npm start win` for Windows systems, or `npm start unix` for unix-based systems (shell script)
