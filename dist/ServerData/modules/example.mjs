@@ -1,5 +1,5 @@
-import Module from "../module.mjs";
-import Logging from "../log.mjs";
+import Module from "scale-modules";
+import Logging from "scale-logging";
 
 // Immediate module setup
 let moduleName = 'Example';
@@ -9,7 +9,7 @@ let log = new Logging(moduleName);
 // Ran when the module has been parsed and imported
 function exec() {
     
-    log.info(`Hello from ${moduleName}!`);
+    log.i(`Hello from ${moduleName}!`);
 
 };
 
