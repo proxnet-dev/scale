@@ -9,7 +9,7 @@
   "author": "@ZombieBrine13092 on GitHub, @zombieb on Discord",
   "license": "ISC",
   "dependencies": {
-    "scale-modules": "git://github.com/proxnet-dev/scale-modules.git#d986656",
+    "scale-modules": "git://github.com/proxnet-dev/scale-modules.git#9de3cfe",
     "scale-logging": "git://github.com/proxnet-dev/scale-logging.git#e8a40b5"
   }
 }
