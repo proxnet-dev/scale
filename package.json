@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "scale-modules": "git://github.com/proxnet-dev/scale-modules.git#d986656",
-    "scale-logging": "git://github.com/proxnet-dev/scale-logging.git#565a273"
+    "scale-logging": "git://github.com/proxnet-dev/scale-logging.git#e8a40b5"
   }
 }
